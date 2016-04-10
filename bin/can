@@ -26,6 +26,7 @@ module Can
 
     desc "get KEY", "Copies a key"
     def get key
+      value = CAN.get(key) or abort "Key #{key} does not exist."
       CAN.copy key
       puts "Key #{key} was copied."
     end

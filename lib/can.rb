@@ -9,7 +9,7 @@ require "io/console"
 
 
 module Can
-  VERSION = "0.5.7"
+  VERSION = "0.5.8"
 
   class Command
 
