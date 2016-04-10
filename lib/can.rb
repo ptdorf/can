@@ -9,7 +9,7 @@ require "io/console"
 
 
 module Can
-  VERSION = "0.5.8"
+  VERSION = "0.6.0"
 
   class Command
 
@@ -17,11 +17,13 @@ module Can
       @file = file
     end
 
-    def list name = nil
-      data = read()
-      data.each do |k, v|
-        puts k
-      end
+    def content
+      read()
+      @content
+    end
+
+    def list
+      read()
     end
 
     def exists name
@@ -77,18 +79,23 @@ module Can
     def read
       @password = ask_password()
 
+      return {} unless File.exist?(@file)
+
       begin
-        content = File.read @file
+        content = File.read(@file)
         # content = Utils.unzip(content)
         content = Utils.rm_header(content)
         content = Utils.clean(content)
         content = Utils.decode(content)
         content = Utils.decrypt(content, @password)
-      rescue
+      rescue Exception => e
+        p e
         content = ""
       end
 
-      data = content.length > 0 ? JSON.parse(content) : {}
+      abort "Fail to open file." unless content.length > 0
+      @content = content
+      data = JSON.parse(@content)
     end
 
     def write data

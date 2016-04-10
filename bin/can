@@ -5,14 +5,6 @@ $LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__)) + "/../lib")
 require "thor"
 require "can"
 
-# unless String.method_defined?(:bold)
-#   class ::String
-#     def bold(*args)
-#       "\033[1m#{self}\033[0m"
-#     end
-#   end
-# end
-
 FILE = "#{ENV['HOME']}/.can"
 CAN  = Can::Command.new(FILE)
 
@@ -21,13 +13,15 @@ module Can
 
     desc "ls", "Lists all keys"
     def ls
-        CAN.list
+      CAN.list.each do |k, v|
+        puts k
+      end
     end
 
     desc "get KEY", "Copies a key"
     def get key
       value = CAN.get(key) or abort "Key #{key} does not exist."
-      CAN.copy key
+      CAN.copy value
       puts "Key #{key} was copied."
     end
 
