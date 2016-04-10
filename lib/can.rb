@@ -9,7 +9,7 @@ require "io/console"
 
 
 module Can
-  VERSION = "0.5.6"
+  VERSION = "0.5.7"
 
   class Command
 
@@ -67,9 +67,9 @@ module Can
 
     private
     def ask_password
-      print "Enter your password: "
+      print "Password: "
       password = STDIN.noecho(&:gets)
-      abort("The password is too short") if password.length < 1
+      abort if password.length < 1
       puts
       password
     end
