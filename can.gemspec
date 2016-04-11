@@ -10,8 +10,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["ptdorf"]
   spec.email         = ["ptdorf@gmail.com"]
   spec.homepage      = "https://rubygemspec.org/gems/can"
-  spec.summary       = "Can stores encrypted information."
-  spec.description   = "Can stores encrypted information"
+  spec.summary       = "Can stores encrypted goods."
+  spec.description   = "Can stores encrypted goods"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split $/
