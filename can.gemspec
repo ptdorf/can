@@ -7,11 +7,11 @@ require "can"
 Gem::Specification.new do |spec|
   spec.name          = "can"
   spec.version       = Can::VERSION
-  spec.authors       = ["ptdorf"]
-  spec.email         = ["ptdorf@gmail.com"]
-  spec.homepage      = "https://rubygemspec.org/gems/can"
   spec.summary       = "Can stores encrypted goods."
   spec.description   = "Can stores encrypted goods"
+  spec.homepage      = "https://rubygemspec.org/gems/can"
+  spec.authors       = ["ptdorf"]
+  spec.email         = ["ptdorf@gmail.com"]
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split $/

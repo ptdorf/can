@@ -1,40 +1,55 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
-$LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__)) + "/../lib")
+$LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__)) + "/../lib"
 
 require "thor"
 require "can"
 
 FILE = "#{ENV['HOME']}/.can"
-CAN  = Can::Command.new(FILE)
 
 module Can
   class Cli < Thor
+    class_option :password, aliases: "-p"
+
+    desc "version", "Show current version"
+    def version
+      puts "v#{VERSION}"
+    end
 
     desc "ls", "Lists all keys"
     def ls
-      CAN.list.each do |k, v|
+      init
+      @can.list.each do |k, v|
         puts k
       end
     end
 
     desc "get KEY", "Copies a key"
     def get key
-      value = CAN.get(key) or abort "Key #{key} does not exist."
-      CAN.copy value
+      init
+      value = @can.get(key) or abort "Key #{key} does not exist."
+      @can.copy value
       puts "Key #{key} was copied."
     end
 
     desc "set KEY VALUE", "Stores a key"
     def set key, value
-      CAN.set key, value
+      init
+      @can.set key, value
       puts "Key #{key} was saved."
     end
 
     desc "rm KEY", "Removes a key"
     def rm key
-      CAN.remove key
+      init
+      @can.remove key
       puts "Key #{key} was deleted."
+    end
+
+    desc "cat", "Shows all content"
+    def cat
+      init
+      puts @can.content
     end
 
     private
@@ -42,13 +57,23 @@ module Can
       name  = name.to_s
       value = args[0]
       if value
-        CAN.set name, value
-        puts "The key #{name} was set."
+        set name, value
       else
-        value = CAN.get(name)
-        CAN.copy value
-        puts "The value for #{name} was copied."
+        get name
       end
+    end
+
+    def init
+      pass = options[:password] || ask_password()
+      @can = Can::Command.new(FILE, pass)
+    end
+
+    def ask_password
+      print "Password: "
+      answer = STDIN.noecho(&:gets)
+      abort if answer.length < 1
+      puts
+      answer
     end
   end
 end
