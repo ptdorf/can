@@ -44,6 +44,18 @@ module Can
       write(data)
     end
 
+    def encrypt content
+      content = Utils.encrypt(content, @password)
+      content = Utils.encode(content)
+      # content = Utils.neat(content)
+    end
+
+    def decrypt content
+      # content = Utils.clean(content)
+      content = Utils.decode(content)
+      content = Utils.decrypt(content, @password)
+    end
+
     private
     def read
       return {} unless File.exist?(@file)
