@@ -48,7 +48,7 @@ module Can
       content = Utils.encrypt(content, @password)
       content = Utils.encode(content)
       # content = Utils.neat(content)
-    end
+      end
 
     def decrypt content
       # content = Utils.clean(content)
