@@ -1,5 +1,4 @@
 #!/usr/bin/env ruby
-# encoding: UTF-8
 $LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__)) + "/../lib"
 
 require "thor"
@@ -32,9 +31,10 @@ module Can
       puts "Key #{key} was copied."
     end
 
-    desc "set KEY VALUE", "Stores a key"
-    def set key, value
+    desc "set KEY [VALUE]", "Stores a key"
+    def set key, value = nil
       init
+      value = value || ask("Value: ")
       @can.set key, value
       puts "Key #{key} was saved."
     end
@@ -76,12 +76,12 @@ module Can
     end
 
     def init
-      pass = options[:password] || ask_password()
+      pass = options[:password] || ask()
       @can = Can::Command.new(FILE, pass)
     end
 
-    def ask_password
-      print "Password: "
+    def ask prompt = "Password: "
+      print prompt
       answer = STDIN.noecho(&:gets)
       abort if answer.length < 1
       puts
