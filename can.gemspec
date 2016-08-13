@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.version       = Can::VERSION
   spec.summary       = "Can stores encrypted goods."
   spec.description   = "Can stores encrypted goods"
-  spec.homepage      = "https://rubygemspec.org/gems/can"
+  spec.homepage      = "https://rubygems.org/gems/can"
   spec.authors       = ["ptdorf"]
   spec.email         = ["ptdorf@gmail.com"]
   spec.license       = "MIT"
