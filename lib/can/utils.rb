@@ -71,9 +71,9 @@ module Can
 
    def self.encrypt content, password
       secret = self.digest(password)
-      cipher = OpenSSL::Cipher::Cipher.new(CIPHER)
+      cipher = OpenSSL::Cipher.new(CIPHER)
       cipher.encrypt
-      cipher.key = secret
+      cipher.key = secret[0..31]
       cipher.iv  = iv = cipher.random_iv
       encrypted  = cipher.update(content) + cipher.final
 
@@ -92,9 +92,9 @@ module Can
           Base64.strict_decode64(v)
         end
 
-        cipher = OpenSSL::Cipher::Cipher.new(CIPHER)
+        cipher = OpenSSL::Cipher.new(CIPHER)
         cipher.decrypt
-        cipher.key = secret
+        cipher.key = secret[0..31]
         cipher.iv = init
 
         cipher.update(encrypted) + cipher.final
