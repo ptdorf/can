@@ -10,7 +10,7 @@ Stores encrypted goods.
 
 ### Usage
 
-    $ can
+    % can
     Commands:
       can get KEY         # Copies a key
       can ls              # Lists all keys
@@ -19,6 +19,6 @@ Stores encrypted goods.
 
 Shortcut:
 
-	% can test
-	Password:
-	The value for test was copied.
+    % can test
+    Password:
+    The value for test was copied.
