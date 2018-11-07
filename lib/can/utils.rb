@@ -44,9 +44,9 @@ module Can
 
     def self.encrypt__ content, password
       secret = self.digest(password)
-      cipher = OpenSSL::Cipher::Cipher.new("AES-256-CBC")
+      cipher = OpenSSL::Cipher.new("AES-256-CBC")
       cipher.encrypt
-      cipher.key = secret
+      cipher.key = secret[0..31]
       cipher.iv  = iv = cipher.random_iv
       encrypted  = cipher.update(content) + cipher.final
 
@@ -61,9 +61,9 @@ module Can
       secret = self.digest(password)
       il, iv, encrypted = content.split("--").map {|v| Base64.strict_decode64(v)}
 
-      cipher = OpenSSL::Cipher::Cipher.new("AES-256-CBC")
+      cipher = OpenSSL::Cipher.new("AES-256-CBC")
       cipher.decrypt
-      cipher.key = secret
+      cipher.key = secret[0..31]
       cipher.iv = iv
 
       cipher.update(encrypted) + cipher.final
