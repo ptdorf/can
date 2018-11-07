@@ -6,5 +6,5 @@ require "can/command"
 require "can/utils"
 
 module Can
-  VERSION = "0.7.6"
+  VERSION = "0.7.7"
 end

@@ -3,6 +3,7 @@ $LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__)) + "/../lib"
 
 require "thor"
 require "can"
+require 'io/console'
 
 FILE = "#{ENV['HOME']}/.can"
 
@@ -82,7 +83,7 @@ module Can
 
     def ask prompt = "Password: "
       print prompt
-      answer = STDIN.noecho(&:gets)
+      answer = STDIN.noecho(&:gets).chomp
       abort if answer.length < 1
       puts
       answer
