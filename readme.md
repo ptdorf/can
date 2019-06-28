@@ -27,10 +27,7 @@ Stores encrypted goods.
 
 ### Example
 
-    % # Store secret
-    % can test ok
-
-    % # Copy secret
-    % can test
+    % can test ok       # Store secret
+    % can test          # Copy that secret
     Password:
     The value for test was copied.
