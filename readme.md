@@ -1,6 +1,6 @@
 # Can
 
-Stores encrypted goods.
+Can stores encrypted goods using symmetric cryptography.
 
 
 ### Installation
@@ -28,7 +28,7 @@ Options:
 
 ### Example
 
-    % can test ok       # Store secret
+    % can test ok       # Store a secret
     % can test          # Copy that secret
     Password:
     The value for test was copied.

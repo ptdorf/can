@@ -7,7 +7,7 @@ require "can"
 Gem::Specification.new do |spec|
   spec.name          = "can"
   spec.version       = Can::VERSION
-  spec.summary       = "Can stores encrypted goods."
+  spec.summary       = "Can stores encrypted goods using symmetric cryptography."
   spec.description   = "Can stores encrypted goods"
   spec.homepage      = "https://rubygems.org/gems/can"
   spec.authors       = ["ptdorf"]
