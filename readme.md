@@ -11,7 +11,7 @@ Can stores encrypted goods using symmetric cryptography.
 ### Usage
 
     % can test ok       # Store a secret
-    % can test          # Copy that secret
+    % can test          # Copy that secret to the clipboard
     Password:
     The value for test was copied.
 
