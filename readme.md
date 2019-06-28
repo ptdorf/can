@@ -25,8 +25,12 @@ Stores encrypted goods.
     Options:
       -p, [--password=PASSWORD]
 
-Shortcut:
+### Example
 
+    % # Store secret
+    % can test ok
+
+    % # Copy secret
     % can test
     Password:
     The value for test was copied.
