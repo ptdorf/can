@@ -34,7 +34,7 @@ module Can
       puts "Key #{key} was copied."
     end
 
-    desc "set KEY VALUE", "Stores a key"
+    desc "set KEY VALUE", "Stores or updates a key"
     def set key, value
       init
       value = value || ask("Value: ")
