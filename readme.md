@@ -36,7 +36,7 @@ Can stores encrypted goods using symmetric cryptography.
 
 ### Avoid typing the password
 
-    % export CAN_PASSWORD="xxx"
+    % export CAN_PASSWORD="word"
     % can cat
     KEY         VALUE
     aws-root    xxx
