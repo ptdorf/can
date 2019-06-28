@@ -19,13 +19,15 @@ module Can
         content = clean(content)
         content = decode(content)
         content = decrypt(content, password)
+
       rescue OpenSSL::Cipher::CipherError => e
         puts "Error: Wrong password."
         content = nil
+
       rescue Exception => e
-        p e
         content = nil
       end
+
       content
     end
 
@@ -36,6 +38,9 @@ module Can
       content = add_header(content)
       # content = Utils.compress(content)
       File.write(file, content)
+      # File.open(file, "wb") do |f|
+      #   f.puts content
+      # end
     end
 
     def self.digest password
@@ -99,8 +104,7 @@ module Can
 
         cipher.update(encrypted) + cipher.final
       rescue OpenSSL::Cipher::CipherError => e
-        puts "NIL"
-        nil
+        return nil
       end
     end
 

@@ -19,5 +19,8 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "thor"
+  spec.add_dependency "tablelize"
   spec.add_development_dependency "rake"
+
+  # spec.required_ruby_version = "~> 2.4"
 end

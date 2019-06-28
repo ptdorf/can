@@ -60,14 +60,9 @@ module Can
     def read
       return {} unless File.exist?(@file)
 
-      begin
-        content = Utils.read(@file, @password)
-      rescue Exception => e
-        p e
-        content = ""
-      end
+      content = Utils.read(@file, @password)
+      abort "Error: Fail to open file." unless content and content.length > 0
 
-      abort "Fail to open file." unless content.length > 0
       @content = content
       data = JSON.parse(@content)
     end

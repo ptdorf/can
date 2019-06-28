@@ -3,7 +3,9 @@ $LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__)) + "/../lib"
 
 require "thor"
 require "can"
-require 'io/console'
+require "io/console"
+require "json"
+require "tablelize"
 
 FILE = "#{ENV['HOME']}/.can"
 
@@ -32,8 +34,8 @@ module Can
       puts "Key #{key} was copied."
     end
 
-    desc "set KEY [VALUE]", "Stores a key"
-    def set key, value = nil
+    desc "set KEY VALUE", "Stores a key"
+    def set key, value
       init
       value = value || ask("Value: ")
       @can.set key, value
@@ -50,7 +52,14 @@ module Can
     desc "cat", "Shows all content"
     def cat
       init
-      puts @can.content
+      data = JSON.parse(@can.content)
+      rows = []
+      rows << ["KEY", "VALUE"]
+      data.each do |k, v|
+        rows << [k, v]
+      end
+
+      Tablelize::table rows
     end
 
     desc "encrypt DATA", "Encrypts data"
@@ -77,7 +86,7 @@ module Can
     end
 
     def init
-      pass = options[:password] || ask()
+      pass = options[:password] || ENV.fetch("CAN_PASSWORD", nil) || ask()
       @can = Can::Command.new(FILE, pass)
     end
 
