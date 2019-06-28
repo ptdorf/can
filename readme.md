@@ -10,6 +10,14 @@ Can stores encrypted goods using symmetric cryptography.
 
 ### Usage
 
+    % can test ok       # Store a secret
+    % can test          # Copy that secret
+    Password:
+    The value for test was copied.
+
+
+### Commands
+
     % ./bin/can
     Commands:
       can cat             # Shows all content
@@ -24,14 +32,6 @@ Can stores encrypted goods using symmetric cryptography.
 
     Options:
       -p, [--password=PASSWORD]
-
-
-### Example
-
-    % can test ok       # Store a secret
-    % can test          # Copy that secret
-    Password:
-    The value for test was copied.
 
 
 ### Avoid typing the password
