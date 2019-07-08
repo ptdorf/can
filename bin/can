@@ -85,6 +85,7 @@ module Can
 
     desc "random [LENGTH]", "Generates a base36 random password"
     def random(length=40, capture=false)
+      init
       pass = rand(36**length.to_i).to_s(36)
       return pass if capture
       puts pass
