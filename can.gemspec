@@ -20,6 +20,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "thor"
   spec.add_dependency "tablelize"
+  spec.add_dependency "base62-rb"
   spec.add_development_dependency "rake"
 
   # spec.required_ruby_version = "~> 2.4"

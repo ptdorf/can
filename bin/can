@@ -34,12 +34,21 @@ module Can
       puts "Key #{key} was copied."
     end
 
-    desc "set KEY VALUE", "Stores or updates a key"
-    def set key, value
+    desc "set KEY [VALUE]", "Stores or updates a key (use '@random' for a random password)"
+    def set key, value=nil, copy=false
       init
+      if value == "@random"
+        copy = true
+        value = random(40, true)
+      end
       value = value || ask("Value: ")
       @can.set key, value
-      puts "Key #{key} was saved."
+      if copy
+        @can.copy value
+        puts "Key #{key} was saved and copied."
+      else
+        puts "Key #{key} was saved."
+      end
     end
 
     desc "rm KEY", "Removes a key"
@@ -72,6 +81,13 @@ module Can
     def decrypt data
       init
       puts @can.decrypt(data)
+    end
+
+    desc "random [LENGTH]", "Generates a base36 random password"
+    def random(length=40, capture=false)
+      pass = rand(36**length.to_i).to_s(36)
+      return pass if capture
+      puts pass
     end
 
     private
