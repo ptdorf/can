@@ -88,7 +88,6 @@ module Can
       init
       pass = rand(36**length.to_i).to_s(36)
       return pass if capture
-      puts pass
       @can.copy pass
       puts "New random password copied."
     end
