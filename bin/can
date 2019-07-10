@@ -72,6 +72,7 @@ module Can
     desc "rm KEY", "Removes a key"
     def rm key
       init
+      @can.get(key) or abort "Key #{key} does not exist."
       @can.remove key
       puts "Key #{key} was deleted."
     end
