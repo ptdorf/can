@@ -4,5 +4,5 @@ require "can/command"
 require "can/utils"
 
 module Can
-  VERSION = "0.9.0"
+  VERSION = "0.9.1"
 end

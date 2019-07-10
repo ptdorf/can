@@ -8,7 +8,8 @@ Gem::Specification.new do |spec|
   spec.name          = "can"
   spec.version       = Can::VERSION
   spec.summary       = "Can stores encrypted goods using symmetric cryptography."
-  spec.description   = File.read("readme.md")
+  # spec.description   = File.read("readme.md")
+  spec.description   = "Can stores encrypted goods using symmetric cryptography (AES-256-CBC)"
   spec.homepage      = "https://rubygems.org/gems/can"
   spec.authors       = ["ptdorf"]
   spec.email         = ["ptdorf@gmail.com"]
