@@ -19,6 +19,7 @@ Can stores encrypted goods using symmetric cryptography.
 ### Commands
 
     % ./bin/can
+    % ./bin/can
     Commands:
       can cat              # Shows all content
       can decrypt DATA     # Decrypts data
@@ -26,13 +27,16 @@ Can stores encrypted goods using symmetric cryptography.
       can get KEY          # Copies a key
       can help [COMMAND]   # Describe available commands or one specific command
       can ls               # Lists all keys
-      can random [LENGTH]  # Generates a new 36 chars password
+      can password         # Change the can password
+      can random [LENGTH]  # Generates a base36 random password
+      can rename KEY NAME  # Renames a secret
       can rm KEY           # Removes a key
-      can set KEY VALUE    # Stores or updates a key
+      can set KEY [VALUE]  # Stores or updates a key (use '@random' for a random password)
       can version          # Show current version
 
     Options:
       -p, [--password=PASSWORD]
+
 
 ### Avoid typing the password
 

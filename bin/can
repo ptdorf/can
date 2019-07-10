@@ -34,6 +34,23 @@ module Can
       puts "Key #{key} was copied."
     end
 
+    desc "rename KEY NAME", "Renames a secret"
+    def rename key, name
+      init
+      value = @can.get(key) or abort "Key #{key} does not exist."
+      @can.set name, value
+      @can.remove key
+      puts "Key #{key} was renamed."
+    end
+
+    desc "password", "Change the can password"
+    def password
+      init
+      pass = ask("New password: ")
+      @can.password pass
+      puts "Can password was changed."
+    end
+
     desc "set KEY [VALUE]", "Stores or updates a key (use '@random' for a random password)"
     def set key, value=nil, copy=false
       init
@@ -42,6 +59,7 @@ module Can
         value = random(40, true)
       end
       value = value || ask("Value: ")
+      puts "@can.set #{key}, #{value}"
       @can.set key, value
       if copy
         @can.copy value

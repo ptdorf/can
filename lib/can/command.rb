@@ -56,12 +56,19 @@ module Can
       content = Utils.decrypt(content, @password)
     end
 
+    def password pass
+      data = read()
+      @password = pass
+      write(data)
+    end
+
     private
     def read
       return {} unless File.exist?(@file)
 
       content = Utils.read(@file, @password)
-      abort "Error: Fail to open file." unless content and content.length > 0
+      abort "Error: Fail to open file. Maybe wrong password?" \
+        unless content and content.length > 0
 
       @content = content
       data = JSON.parse(@content)
