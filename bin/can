@@ -67,7 +67,7 @@ module Can
       @can.set key, value
       if copy
         @can.copy value
-        puts "Key #{key} was saved and copied."
+        puts "Key #{key} was stored and copied to the clipboard."
       else
         puts "Key #{key} was stored."
       end
