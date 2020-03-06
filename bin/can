@@ -31,7 +31,7 @@ module Can
       init
       value = @can.get(key) or abort "Key #{key} does not exist."
       @can.copy value
-      puts "Key #{key} was copied."
+      puts "Key #{key} was copied to the clipboard."
     end
 
     desc "rename KEY NEW_KEY", "Renames a secret"
@@ -61,7 +61,7 @@ module Can
       init
       if value == "@random"
         copy = true
-        value = random(40, true)
+        value = random(60, true)
       end
       value = value || ask("Value: ")
       @can.set key, value
@@ -69,7 +69,7 @@ module Can
         @can.copy value
         puts "Key #{key} was saved and copied."
       else
-        puts "Key #{key} was saved."
+        puts "Key #{key} was stored."
       end
     end
 
@@ -117,7 +117,7 @@ module Can
     end
 
     private
-    def method_missing name, *args
+    def __method_missing name, *args
       name  = name.to_s
       value = args[0]
       if value
@@ -127,21 +127,29 @@ module Can
       end
     end
 
-    def init
-      pass = options[:password] || ENV.fetch("CAN_PASSWORD", nil) || ask()
-      @can = Can::Command.new(FILE, pass)
-      begin @can.list
-        # All ok
+    def init()
+      return if check(options[:password], "options")
+      return if check(ENV.fetch("CAN_PASSWORD", nil), "environment")
+      return if check(ask(), "prompt")
+      abort
+    end
+
+    def check(password, source)
+      return if not password or password.length < 1
+      @can = Can::Command.new(FILE, password)
+      begin
+        @can.list
+        return true
       rescue
-        puts "Wrong password"
+        puts "Wrong password (source: #{source})"
         abort
       end
     end
 
-    def ask prompt = "Password: "
+    def ask(prompt = "Password: ")
       print prompt
       answer = STDIN.noecho(&:gets).chomp
-      abort if answer.length < 1
+      abort "Cancelled" if answer.length < 1
       puts
       answer
     end

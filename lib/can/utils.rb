@@ -21,7 +21,7 @@ module Can
         content = decrypt(content, password)
 
       rescue OpenSSL::Cipher::CipherError => e
-        puts "Error: Wrong password."
+        raise "Wrong password."
         content = nil
 
       rescue Exception => e

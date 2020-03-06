@@ -67,7 +67,7 @@ module Can
       return {} unless File.exist?(@file)
 
       content = Utils.read(@file, @password)
-      abort "Error: Fail to open file. Maybe wrong password?" \
+      raise "Error: Fail to open file." \
         unless content and content.length > 0
 
       @content = content
