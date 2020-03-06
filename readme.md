@@ -46,3 +46,10 @@ Can stores encrypted goods using symmetric cryptography.
     aws-root    xxx
     azure-aad   xxx
     vpn-demo    xxx
+
+
+### Deploy
+
+Just run:
+
+    rake
