@@ -12,30 +12,33 @@ FILE = "#{ENV['HOME']}/.can"
 module Can
   class Cli < Thor
     class_option :password, aliases: "-p"
+    class_option :verbose, aliases: "-v", :type => :boolean
+    class_option :file, aliases: "-f"
 
     desc "version", "Show current version"
     def version
-      puts "v#{VERSION}"
+      puts VERSION
     end
 
-    desc "ls", "Lists all keys"
-    def ls
+    desc "ls [TAG]", "Lists all keys (filter optionally by tag"
+    def ls(tag=nil)
       init
-      @can.list.each do |k, v|
-        puts k
+      @can.list.each do |key, entry|
+        next if tag and (not entry["tags"] or not entry["tags"].include?(tag))
+        puts key
       end
     end
 
     desc "get KEY", "Copies a key to the clipboard"
-    def get key
+    def get(key)
       init
       value = @can.get(key) or abort "Key #{key} does not exist."
-      @can.copy value
+      @can.copy val(value)
       puts "Key #{key} was copied to the clipboard."
     end
 
     desc "rename KEY NEW_KEY", "Renames a secret"
-    def rename key, new_key
+    def rename(key, new_key)
       init
       value = @can.get(key) or abort "Key #{key} does not exist."
       @can.set new_key, value
@@ -57,7 +60,7 @@ module Can
     end
 
     desc "set KEY [VALUE]", "Stores a value (leave the value empty for a prompt; use '@random' for a random value)"
-    def set key, value=nil, copy=false
+    def set(key, value=nil, copy=false)
       init
       if value == "@random"
         copy = true
@@ -74,40 +77,91 @@ module Can
     end
 
     desc "rm KEY", "Removes a key"
-    def rm key
+    def rm(key)
       init
-      @can.get(key) or abort "Key #{key} does not exist."
+      @can.exists(key) or abort "Key #{key} does not exist."
       @can.remove key
       puts "Key #{key} was deleted."
+    end
+
+    desc "tag KEY TAG", "Tags a key"
+    def tag(key, tag)
+      init
+      @can.exists(key) or abort "Key #{key} does not exist."
+      ok = @can.tag(key, tag)
+      puts "Tag #{tag} was added to #{key}." if ok
+      puts "Tag #{tag} already exists on #{key}." unless ok
+    end
+
+    desc "tags [KEY]", "Show all tags (filter for a key)"
+    def tags(key=nil)
+      init
+      if key
+        @can.exists(key) or abort "Key #{key} does not exist."
+        entry = @can.get(key)
+        tags = entry["tags"] || []
+      else
+        tags = []
+        @can.list.each do |key, entry|
+          entry["tags"] = entry["tags"] || []
+          tags = tags | entry["tags"]
+        end
+      end
+
+      puts tags.uniq.join("\n")
+    end
+
+    desc "untag KEY TAG", "Untags a tag from a key"
+    def untag(key, tag)
+      init
+      @can.exists(key) or abort "Key #{key} does not exist."
+      ok = @can.untag(key, tag)
+      puts "Tag #{tag} was removed from #{key}." if ok
+      puts "Tag #{tag} doesn't exist on #{key}." unless ok
     end
 
     desc "cat", "Shows all content"
     def cat
       init
-      data = JSON.parse(@can.content)
-      rows = []
-      rows << ["KEY", "VALUE"]
-      data.each do |k, v|
-        rows << [k, v]
+      rows = [["KEY", "VALUE", "CREATED", "TAGS"]]
+      @can.list.each do |key, entry|
+        if entry.class == Hash
+          value = entry["value"]
+          created = entry["created"]
+          entry["tags"] = entry["tags"] || []
+          tags = entry["tags"].join(" ")
+        else
+          value = entry
+          created = "-"
+          tags = ""
+        end
+        rows << [key, value, created, tags]
       end
 
       Tablelize::table rows
     end
 
+    desc "migrate", "Migrates to new format"
+    def migrate()
+      init
+      count = @can.migrate()
+      puts "Keys migrated: #{count}."
+    end
+
     desc "encrypt DATA", "Encrypts data"
-    def encrypt data
+    def encrypt(data)
       init
       puts @can.encrypt(data)
     end
 
     desc "decrypt DATA", "Decrypts data"
-    def decrypt data
+    def decrypt(data)
       init
       puts @can.decrypt(data)
     end
 
     desc "random [LENGTH]", "Generates a base36 random password"
-    def random(length=40, capture=false)
+    def random(length=60, capture=false)
       # init
       pass = rand(36**length.to_i).to_s(36)
       return pass if capture
@@ -128,6 +182,11 @@ module Can
     end
 
     def init()
+      @file = options[:file] || ENV.fetch("CAN_FILE", nil) || FILE
+      debug "Can version #{VERSION}"
+      debug "Using verbose mode (goes to STDERR)"
+      debug "Using file #{@file}"
+
       return if check(options[:password], "options")
       return if check(ENV.fetch("CAN_PASSWORD", nil), "environment")
       return if check(ask(), "prompt")
@@ -136,23 +195,42 @@ module Can
 
     def check(password, source)
       return if not password or password.length < 1
-      @can = Can::Command.new(FILE, password)
+
+      @can = Can::Command.new(@file, password)
       begin
         @can.list
+        debug "Opened with password from #{source}"
         return true
       rescue
-        puts "Wrong password (source: #{source})"
+        debug "Failed to open with password from #{source}"
+        abort "Wrong password"
+      end
+    end
+
+    def val(value)
+      return value["value"] if value.class == Hash
+      value
+    end
+
+    def ask(prompt = "Password: ")
+      begin
+        print prompt
+        answer = STDIN.noecho(&:gets).chomp
+        raise Interrupt if answer.length < 1
+        puts
+        answer
+      rescue Interrupt
+        puts
+        debug "Password prompt cancelled"
         abort
       end
     end
 
-    def ask(prompt = "Password: ")
-      print prompt
-      answer = STDIN.noecho(&:gets).chomp
-      abort "Cancelled" if answer.length < 1
-      puts
-      answer
+    def debug(message)
+      return if not options[:verbose]
+      STDERR.puts "\033[38;5;240m#{message}\033[0m"
     end
+
   end
 end
 

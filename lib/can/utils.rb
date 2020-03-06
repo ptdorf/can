@@ -9,7 +9,7 @@ module Can
     HEADER = "Can:v1\n\n"
     CIPHER = "AES-256-CBC"
 
-    def self.read file, password
+    def self.read(file, password)
       return unless File.exist?(file)
 
       begin
@@ -31,7 +31,7 @@ module Can
       content
     end
 
-    def self.write file, password, content
+    def self.write(file, password, content)
       content = encrypt(content, password)
       content = encode(content)
       content = neat(content)
@@ -43,38 +43,38 @@ module Can
       # end
     end
 
-    def self.digest password
+    def self.digest(password)
       Digest::SHA1.hexdigest(password)
     end
 
-    def self.encrypt__ content, password
-      secret = self.digest(password)
-      cipher = OpenSSL::Cipher.new("AES-256-CBC")
-      cipher.encrypt
-      cipher.key = secret[0..31]
-      cipher.iv  = iv = cipher.random_iv
-      encrypted  = cipher.update(content) + cipher.final
+    # def self.encrypt__ content, password
+    #   secret = self.digest(password)
+    #   cipher = OpenSSL::Cipher.new("AES-256-CBC")
+    #   cipher.encrypt
+    #   cipher.key = secret[0..31]
+    #   cipher.iv  = iv = cipher.random_iv
+    #   encrypted  = cipher.update(content) + cipher.final
 
-      bi = Base64.strict_encode64(iv)
-      il = bi.length.to_s
-      bl = Base64.strict_encode64(il)
-      bd = Base64.strict_encode64(encrypted)
-      bl + "--" + bi + "--" + bd
-    end
+    #   bi = Base64.strict_encode64(iv)
+    #   il = bi.length.to_s
+    #   bl = Base64.strict_encode64(il)
+    #   bd = Base64.strict_encode64(encrypted)
+    #   bl + "--" + bi + "--" + bd
+    # end
 
-    def self.decrypt__ content, password
-      secret = self.digest(password)
-      il, iv, encrypted = content.split("--").map {|v| Base64.strict_decode64(v)}
+    # def self.decrypt__ content, password
+    #   secret = self.digest(password)
+    #   il, iv, encrypted = content.split("--").map {|v| Base64.strict_decode64(v)}
 
-      cipher = OpenSSL::Cipher.new("AES-256-CBC")
-      cipher.decrypt
-      cipher.key = secret[0..31]
-      cipher.iv = iv
+    #   cipher = OpenSSL::Cipher.new("AES-256-CBC")
+    #   cipher.decrypt
+    #   cipher.key = secret[0..31]
+    #   cipher.iv = iv
 
-      cipher.update(encrypted) + cipher.final
-    end
+    #   cipher.update(encrypted) + cipher.final
+    # end
 
-   def self.encrypt content, password
+   def self.encrypt(content, password)
       secret = self.digest(password)
       cipher = OpenSSL::Cipher.new(CIPHER)
       cipher.encrypt
@@ -90,7 +90,7 @@ module Can
       binit + "--" + bdata
     end
 
-    def self.decrypt content, password
+    def self.decrypt(content, password)
       begin
         secret = self.digest(password)
         init, encrypted = content.split("--").map do |v|
@@ -108,35 +108,35 @@ module Can
       end
     end
 
-    def self.encode data
+    def self.encode(data)
       data.unpack("H*").first
     end
 
-    def self.decode data
+    def self.decode(data)
       data.scan(/../).map { |x| x.hex }.pack("c*")
     end
 
-    def self.compress data
+    def self.compress(data)
       Zlib::Deflate.deflate data
     end
 
-    def self.uncompress data
+    def self.uncompress(data)
       Zlib::Inflate.inflate data
     end
 
-    def self.neat data
+    def self.neat(data)
       data.scan(/.{1,64}/).join("\n")
     end
 
-    def self.clean data
+    def self.clean(data)
       data.split("\n").join("")
     end
 
-    def self.add_header data
+    def self.add_header(data)
       "#{HEADER}#{data}"
     end
 
-    def self.rm_header data
+    def self.rm_header(data)
       data.sub(HEADER, "")
     end
 
