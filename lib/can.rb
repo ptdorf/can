@@ -1,8 +1,8 @@
 $LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__)) + "/../lib"
 
-require "can/command"
-require "can/utils"
+require "can/store"
+require "can/crypto"
 
 module Can
-  VERSION = "0.9.11"
+  VERSION = "0.9.12"
 end

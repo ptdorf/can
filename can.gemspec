@@ -1,4 +1,3 @@
-# coding: utf-8
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
@@ -10,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.summary       = "Can stores encrypted goods using symmetric cryptography."
   # spec.description   = File.read("readme.md")
   spec.description   = "Can stores encrypted goods using symmetric cryptography (AES-256-CBC)"
-  spec.homepage      = "https://rubygems.org/gems/can"
+  spec.homepage      = "https://github.com/ptdorf/can"
   spec.authors       = ["ptdorf"]
   spec.email         = ["ptdorf@gmail.com"]
   spec.license       = "MIT"

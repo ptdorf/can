@@ -15,35 +15,62 @@ module Can
     class_option :verbose, aliases: "-v", :type => :boolean
     class_option :file, aliases: "-f"
 
-    desc "version", "Show current version"
+    desc "version", "Show the current version"
     def version
       puts VERSION
     end
 
-    desc "ls [TAG]", "Lists all keys (filter optionally by tag"
+    desc "ls [TAG]", "Lists all keys (filter optionally by TAG)"
+    option :show, :type => :boolean, aliases: "-s"
+    option :long, :type => :boolean, aliases: "-l"
     def ls(tag=nil)
       init
-      @can.list.each do |key, entry|
+      rows = options[:show] ?
+        [["KEY", "VALUE", "CREATED", "TAGS"]] :
+        [["KEY", "LENGTH", "CREATED", "TAGS"]]
+
+      @can.all().each do |key, entry|
         next if tag and (not entry["tags"] or not entry["tags"].include?(tag))
-        puts key
+        if not options[:long] and not options[:show]
+          puts key
+          next
+        end
+
+        if entry.class == Hash
+          value = entry["value"]
+          created = entry["created"]
+          entry["tags"] = entry["tags"] || []
+          tags = entry["tags"].join(" ")
+        else
+          value = entry
+          created = ""
+          tags = ""
+        end
+        if options[:show]
+          rows << [key, value, created, tags]
+        else
+          rows << [key, value.size, created, tags]
+        end
       end
+
+      Tablelize::table rows if options[:long] or options[:show]
     end
 
-    desc "get KEY", "Copies a key to the clipboard"
+    desc "get KEY", "Copies a KEY to the clipboard"
     def get(key)
       init
-      value = @can.get(key) or abort "Key #{key} does not exist."
-      @can.copy val(value)
+      entry = @can.get(key) or abort "Key #{key} does not exist."
+      copy(val(entry))
       puts "Key #{key} was copied to the clipboard."
     end
 
-    desc "rename KEY NEW_KEY", "Renames a secret"
-    def rename(key, new_key)
+    desc "rename KEY NEW_NAME", "Renames a secret"
+    def rename(key, new_name)
       init
-      value = @can.get(key) or abort "Key #{key} does not exist."
-      @can.set new_key, value
+      entry = @can.get(key) or abort "Key #{key} does not exist."
+      @can.set new_name, val(entry)
       @can.remove key
-      puts "Key #{key} was renamed to #{new_key}."
+      puts "Key #{key} was renamed to #{new_name}."
     end
 
     desc "password", "Change the can password"
@@ -59,17 +86,18 @@ module Can
       puts "Can password was changed."
     end
 
-    desc "set KEY [VALUE]", "Stores a value (leave the value empty for a prompt; use '@random' for a random value)"
-    def set(key, value=nil, copy=false)
+    desc "set KEY [VALUE]", "Stores a value (empty VALUE show the prompt; use '@random' for a random value)"
+    def set(key, value=nil)
       init
+      clipboard = false
       if value == "@random"
-        copy = true
+        clipboard = true
         value = random(60, true)
       end
       value = value || ask("Value: ")
       @can.set key, value
-      if copy
-        @can.copy value
+      if clipboard
+        copy(value)
         puts "Key #{key} was stored and copied to the clipboard."
       else
         puts "Key #{key} was stored."
@@ -102,7 +130,7 @@ module Can
         tags = entry["tags"] || []
       else
         tags = []
-        @can.list.each do |key, entry|
+        @can.all().each do |key, entry|
           entry["tags"] = entry["tags"] || []
           tags = tags | entry["tags"]
         end
@@ -124,7 +152,7 @@ module Can
     def cat
       init
       rows = [["KEY", "VALUE", "CREATED", "TAGS"]]
-      @can.list.each do |key, entry|
+      @can.all().each do |key, entry|
         if entry.class == Hash
           value = entry["value"]
           created = entry["created"]
@@ -160,13 +188,21 @@ module Can
       puts @can.decrypt(data)
     end
 
-    desc "random [LENGTH]", "Generates a base36 random password"
+    desc "random [LENGTH]", "Generates a random password"
+    option :symbols, :type => :boolean, aliases: "-s"
     def random(length=60, capture=false)
-      # init
-      pass = rand(36**length.to_i).to_s(36)
+      info
+      length  = length.to_i
+      chars   = ("0".."9").to_a + ("A".."Z").to_a + ("a".."z").to_a
+      chars  += ("!".."?").to_a if options[:symbols]
+      chars.delete(["'", '"'])
+      # pass = chars.sort_by { rand }.join[0...length]
+      pass = []
+      (1 .. length).each do
+        pass << chars[rand(chars.size)]
+      end
+      pass = pass.join()
       return pass if capture
-      # @can.copy pass
-      # puts "New random password copied."
       puts pass
     end
 
@@ -181,11 +217,16 @@ module Can
       end
     end
 
+    def info()
+      debug "Can version: #{VERSION}"
+      debug "Using verbose mode (goes to stderr)"
+      debug "Using file #{@file}"
+      debug "Using options #{options}"
+    end
+
     def init()
       @file = options[:file] || ENV.fetch("CAN_FILE", nil) || FILE
-      debug "Can version #{VERSION}"
-      debug "Using verbose mode (goes to STDERR)"
-      debug "Using file #{@file}"
+      info()
 
       return if check(options[:password], "options")
       return if check(ENV.fetch("CAN_PASSWORD", nil), "environment")
@@ -196,10 +237,11 @@ module Can
     def check(password, source)
       return if not password or password.length < 1
 
-      @can = Can::Command.new(@file, password)
+      @can = Can::Store.new(@file, password)
       begin
-        @can.list
+        @can.all()
         debug "Opened with password from #{source}"
+        debug "Can format: v#{@can.format()}"
         return true
       rescue
         debug "Failed to open with password from #{source}"
@@ -229,6 +271,11 @@ module Can
     def debug(message)
       return if not options[:verbose]
       STDERR.puts "\033[38;5;240m#{message}\033[0m"
+    end
+
+    def copy(value)
+      IO.popen("pbcopy", "w") { |cc| cc.write(value) }
+      value
     end
 
   end
