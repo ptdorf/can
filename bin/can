@@ -50,7 +50,7 @@ module Can
       pass2 = ask("Confirm password: ")
       if pass1 != pass2
         puts "Passwords don't match."
-        return
+        abort
       end
       @can.password pass
       puts "Can password was changed."
@@ -130,6 +130,12 @@ module Can
     def init
       pass = options[:password] || ENV.fetch("CAN_PASSWORD", nil) || ask()
       @can = Can::Command.new(FILE, pass)
+      begin @can.list
+        # All ok
+      rescue
+        puts "Wrong password"
+        abort
+      end
     end
 
     def ask prompt = "Password: "
