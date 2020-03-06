@@ -148,27 +148,6 @@ module Can
       puts "Tag #{tag} doesn't exist on #{key}." unless ok
     end
 
-    desc "cat", "Shows all content"
-    def cat
-      init
-      rows = [["KEY", "VALUE", "CREATED", "TAGS"]]
-      @can.all().each do |key, entry|
-        if entry.class == Hash
-          value = entry["value"]
-          created = entry["created"]
-          entry["tags"] = entry["tags"] || []
-          tags = entry["tags"].join(" ")
-        else
-          value = entry
-          created = "-"
-          tags = ""
-        end
-        rows << [key, value, created, tags]
-      end
-
-      Tablelize::table rows
-    end
-
     desc "migrate", "Migrates to new format"
     def migrate()
       init
