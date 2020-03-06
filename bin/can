@@ -21,17 +21,15 @@ module Can
     end
 
     desc "ls [TAG]", "Lists all keys (filter optionally by TAG)"
-    option :show, :type => :boolean, aliases: "-s"
-    option :long, :type => :boolean, aliases: "-l"
+    # option :values, :type => :boolean
+    option :short, :type => :boolean, aliases: "-s"
     def ls(tag=nil)
       init
-      rows = options[:show] ?
-        [["KEY", "VALUE", "CREATED", "TAGS"]] :
-        [["KEY", "LENGTH", "CREATED", "TAGS"]]
+      rows = [["KEY", "LENGTH", "CREATED", "TAGS"]]
 
       @can.all().each do |key, entry|
         next if tag and (not entry["tags"] or not entry["tags"].include?(tag))
-        if not options[:long] and not options[:show]
+        if options[:short]
           puts key
           next
         end
@@ -46,14 +44,16 @@ module Can
           created = ""
           tags = ""
         end
-        if options[:show]
-          rows << [key, value, created, tags]
-        else
-          rows << [key, value.size, created, tags]
-        end
+
+        rows << [key, value.size, created, tags]
+        # if options[:values]
+        #   rows << [key, value, created, tags]
+        # else
+        #   rows << [key, value.size, created, tags]
+        # end
       end
 
-      Tablelize::table rows if options[:long] or options[:show]
+      Tablelize::table(rows) if not options[:short]
     end
 
     desc "get KEY", "Copies a KEY to the clipboard"
