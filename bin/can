@@ -224,7 +224,7 @@ module Can
         return true
       rescue
         debug "Failed to open with password from #{source}"
-        abort "Wrong password"
+        raise "Wrong password"
       end
     end
 
@@ -234,17 +234,11 @@ module Can
     end
 
     def ask(prompt = "Password: ")
-      begin
         print prompt
         answer = STDIN.noecho(&:gets).chomp
         raise Interrupt if answer.length < 1
         puts
         answer
-      rescue Interrupt
-        puts
-        debug "Password prompt cancelled"
-        abort
-      end
     end
 
     def debug(message)
@@ -260,4 +254,12 @@ module Can
   end
 end
 
-Can::Cli.start ARGV
+begin
+  Can::Cli.start ARGV
+rescue Interrupt
+  puts
+  exit 2
+rescue Exception => e
+  puts "Error: #{e}"
+  exit 1
+end

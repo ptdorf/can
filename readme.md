@@ -24,22 +24,20 @@ of secrets is ascii based so feel free to commit it.
 
     % can
     Commands:
-      can cat                 # Shows all content
-      can decrypt DATA        # Decrypts data
-      can encrypt DATA        # Encrypts data
-      can get KEY             # Copies a key to the clipboard
-      can help [COMMAND]      # Describe available commands or one specific command
-      can ls [TAG]            # Lists all keys (filter optionally by tag
-      can migrate             # Migrates to new format
-      can password            # Change the can password
-      can random [LENGTH]     # Generates a base36 random password
-      can rename KEY NEW_KEY  # Renames a secret
-      can rm KEY              # Removes a key
-      can set KEY [VALUE]     # Stores a value (leave the value empty for a prompt; use '@random' for a random value)
-      can tag KEY TAG         # Tags a key
-      can tags [KEY]          # Show all tags (filter for a key)
-      can untag KEY TAG       # Untags a tag from a key
-      can version             # Show current version
+      can decrypt DATA         # Decrypts data
+      can encrypt DATA         # Encrypts data
+      can get KEY              # Copies a KEY to the clipboard
+      can help [COMMAND]       # Describe available commands or one specific command
+      can ls [TAG]             # Lists all keys (filter optionally by TAG)
+      can password             # Change the can password
+      can random [LENGTH]      # Generates a random password
+      can rename KEY NEW_NAME  # Renames a secret
+      can rm KEY               # Removes a key
+      can set KEY [VALUE]      # Stores a value (empty VALUE show the prompt; use '@rando...
+      can tag KEY TAG          # Tags a key
+      can tags [KEY]           # Show all tags (filter for a key)
+      can untag KEY TAG        # Untags a tag from a key
+      can version              # Show the current version
 
     Options:
       -p, [--password=PASSWORD]
