@@ -46,7 +46,12 @@ module Can
     desc "password", "Change the can password"
     def password
       init
-      pass = ask("New password: ")
+      pass1 = ask("New password: ")
+      pass2 = ask("Confirm password: ")
+      if pass1 != pass2
+        puts "Passwords don't match."
+        return
+      end
       @can.password pass
       puts "Can password was changed."
     end
