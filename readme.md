@@ -18,7 +18,7 @@ Can stores encrypted goods using symmetric cryptography.
 
 ### Commands
 
-    % ./bin/can
+    % can
     Commands:
       can cat                 # Shows all content
       can decrypt DATA        # Decrypts data
