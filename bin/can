@@ -18,10 +18,14 @@ module Can
     desc "version", "Show the current version"
     def version
       puts VERSION
+      version = Util.latest()
+      debug "Remote version: #{version}"
+      if Gem::Version.new(version) > Gem::Version.new(VERSION)
+        STDERR.puts "New version #{version} available."
+      end
     end
 
     desc "ls [TAG]", "Lists all keys (filter optionally by TAG)"
-    # option :values, :type => :boolean
     option :short, :type => :boolean, aliases: "-s"
     def ls(tag=nil)
       init
