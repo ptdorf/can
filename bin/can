@@ -18,10 +18,10 @@ module Can
     desc "version", "Show the current version"
     def version
       puts VERSION
-      version = Util.latest()
-      debug "Remote version: #{version}"
-      if Gem::Version.new(version) > Gem::Version.new(VERSION)
-        STDERR.puts "New version #{version} available."
+      latest = Util.latest()
+      debug "Remote version: #{latest}"
+      if Gem::Version.new(latest) > Gem::Version.new(VERSION)
+        STDERR.puts "New version #{latest} available."
       end
     end
 
