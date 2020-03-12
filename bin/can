@@ -177,7 +177,9 @@ module Can
       info
       length  = length.to_i
       chars   = ("0".."9").to_a + ("A".."Z").to_a + ("a".."z").to_a
-      chars  += ("!".."?").to_a if options[:symbols]
+      # chars  += ("!".."?").to_a if options[:symbols]
+      chars  += %w(! ? # $ @ % & ~ _ - + = : . ; , æ ø å\\ / \( \) { } < >).to_a \
+        if options[:symbols]
       chars.delete(["'", '"'])
       # pass = chars.sort_by { rand }.join[0...length]
       pass = []
