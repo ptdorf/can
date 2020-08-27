@@ -33,6 +33,14 @@ module Can
       end
     end
 
+    # desc "info", "Show the current state of affairs"
+    # def info
+    #   init
+    #   # options[:verbose] = true
+    #   ENV["CAN_DEBUG"] = "1"
+    #   _info()
+    # end
+
     desc "ls [TAG]", "Lists all keys (filter optionally by TAG)"
     option :short, :type => :boolean, aliases: "-s"
     def ls(tag=nil)
@@ -217,7 +225,7 @@ module Can
       end
     end
 
-    def info()
+    def _info()
       debug "Can version: #{VERSION}"
       debug "Check files #{FILES}"
       debug "Check dirs #{DIRS}"
@@ -254,7 +262,7 @@ module Can
 
       raise "Cound't find a valid can file (#{@file})." if not File.file?(@file)
 
-      info()
+      _info()
 
       return if check(options[:password], "options")
       return if check(ENV.fetch("CAN_PASSWORD", nil), "environment")
@@ -291,7 +299,8 @@ module Can
     end
 
     def debug(message)
-      return if not options[:verbose]
+      show = options[:verbose] || ENV.fetch("CAN_DEBUG", "0") == "1"
+      return if not show
       STDERR.puts "\033[38;5;240m#{message}\033[0m"
     end
 
