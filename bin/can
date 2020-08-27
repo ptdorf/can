@@ -7,6 +7,11 @@ require "io/console"
 require "json"
 require "tablelize"
 
+DIRS = [
+  "#{ENV['HOME']}/.config/can",
+  "/etc/can",
+]
+
 FILES = [
   "#{ENV['HOME']}/.config/can/main.can",
   "#{ENV['HOME']}/.can",
@@ -33,6 +38,7 @@ module Can
     def ls(tag=nil)
       init
       rows = [["KEY", "LEN", "CREATED", "TAGS"]]
+      empty = true
 
       @can.all().each do |key, entry|
         next if tag and (not entry["tags"] or not entry["tags"].include?(tag))
@@ -53,11 +59,17 @@ module Can
         end
 
         rows << [key, value.size, created, tags]
+        empty = false
         # if options[:values]
         #   rows << [key, value, created, tags]
         # else
         #   rows << [key, value.size, created, tags]
         # end
+      end
+
+      if empty
+        puts "The can file #{@file} is empty."
+        return
       end
 
       Tablelize::table(rows) if not options[:short]
@@ -207,13 +219,16 @@ module Can
 
     def info()
       debug "Can version: #{VERSION}"
-      debug "Using verbose mode (goes to stderr)"
-      debug "Using files #{@files}"
+      debug "Check files #{FILES}"
+      debug "Check dirs #{DIRS}"
+      debug "Using file #{@file}"
       debug "Using options #{options}"
+      debug "Using verbose mode (goes to stderr)"
     end
 
     def init()
       @file = options[:file] || ENV.fetch("CAN_FILE", nil)
+
       if @file == nil
         FILES.each do |file|
           debug "Checking file #{file}"
@@ -223,8 +238,21 @@ module Can
             break
           end
         end
-        raise "Cound't find a valid file" if @file == nil
+
+      elsif File.extname(@file) != ".can"
+        DIRS.each do |dir|
+          file = "#{dir}/#{@file}.can"
+          debug "Checking file #{file}"
+          if File.file?(file)
+            @file = file
+            debug "Using file #{file}"
+            break
+          end
+        end
+
       end
+
+      raise "Cound't find a valid can file (#{@file})." if not File.file?(@file)
 
       info()
 

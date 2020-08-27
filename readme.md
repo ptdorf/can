@@ -6,12 +6,12 @@ It uses symmetric cryptography with the cipher `AES-256-CBC`. The file database
 of secrets is ascii based so feel free to commit it.
 
 
-## Installation
+# Installation
 
     gem install can
 
 
-### Usage
+# Usage
 
     % can set test ok       # Stores a secret
     Key test was stored.
@@ -20,7 +20,7 @@ of secrets is ascii based so feel free to commit it.
     Key test was copied to the clipboard.
 
 
-### Commands
+## Commands
 
     % can
     Commands:
@@ -45,7 +45,7 @@ of secrets is ascii based so feel free to commit it.
       -f, [--file=FILE]
 
 
-### Using another can file
+## Using another can file
 
 Use the `CAN_FILE` environment variable or pass the `--file FILE` or `-f FILE`
 param option to use another can file:
@@ -58,7 +58,26 @@ param option to use another can file:
     vpn-demo
 
 
-### Avoid the password prompt
+## Default lookup files
+
+If you don't pass an explicit `--file` or `-f` the default ones are checked in
+order. The first one to exist is used:
+
+    ~/.config/can/main.can
+    ~/.can
+
+
+## Default lookup directories
+
+If you pass an explicit file (via the `--file` or `-f` flags) *without* a `.can`
+file extension the following directories are checked. The first one to have a
+file that exists with a `<dir>/<file>.can` match is used:
+
+    ~/.config/can
+    /etc/can
+
+
+## Avoid the password prompt
 
 Use the `CAN_PASSWORD` environment variable to avoid the password prompt:
 
