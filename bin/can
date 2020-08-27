@@ -239,7 +239,7 @@ module Can
     def init()
       @file = options[:file] || ENV.fetch("CAN_FILE", nil)
 
-      if @file.length == 0 or @file == nil
+      if @file == nil or @file.length == 0
         FILES.each do |file|
           debug "Checking file #{file}"
           if File.file?(file)
