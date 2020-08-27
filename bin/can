@@ -49,6 +49,7 @@ module Can
       empty = true
 
       @can.all().each do |key, entry|
+        empty = false
         next if tag and (not entry["tags"] or not entry["tags"].include?(tag))
         if options[:short]
           puts key
@@ -67,7 +68,6 @@ module Can
         end
 
         rows << [key, value.size, created, tags]
-        empty = false
         # if options[:values]
         #   rows << [key, value, created, tags]
         # else
