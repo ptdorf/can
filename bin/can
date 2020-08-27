@@ -33,6 +33,12 @@ module Can
       end
     end
 
+    # desc "dump", "Show all the contents"
+    # def dump
+    #   init
+    #   p @can.all()
+    # end
+
     # desc "info", "Show the current state of affairs"
     # def info
     #   init
@@ -95,8 +101,7 @@ module Can
     def rename(key, new_name)
       init
       entry = @can.get(key) or abort "Key #{key} does not exist."
-      @can.set new_name, val(entry)
-      @can.remove key
+      @can.rename key, new_name
       puts "Key #{key} was renamed to #{new_name}."
     end
 

@@ -41,6 +41,13 @@ module Can
       write(data)
     end
 
+    def rename(key, new_key)
+      data = read()
+      data[new_key] = data[key]
+      data.delete(key)
+      write(data)
+    end
+
     def tag(key, tag)
       data = read()
       data[key]["tags"] = data[key]["tags"] || []
