@@ -7,7 +7,10 @@ require "io/console"
 require "json"
 require "tablelize"
 
-FILE = "#{ENV['HOME']}/.can"
+FILES = [
+  "#{ENV['HOME']}/.config/can/main.can",
+  "#{ENV['HOME']}/.can",
+]
 
 module Can
   class Cli < Thor
@@ -205,12 +208,24 @@ module Can
     def info()
       debug "Can version: #{VERSION}"
       debug "Using verbose mode (goes to stderr)"
-      debug "Using file #{@file}"
+      debug "Using files #{@files}"
       debug "Using options #{options}"
     end
 
     def init()
-      @file = options[:file] || ENV.fetch("CAN_FILE", nil) || FILE
+      @file = options[:file] || ENV.fetch("CAN_FILE", nil)
+      if @file == nil
+        FILES.each do |file|
+          debug "Checking file #{file}"
+          if File.file?(file)
+            @file = file
+            debug "Using file #{file}"
+            break
+          end
+        end
+        raise "Cound't find a valid file" if @file == nil
+      end
+
       info()
 
       return if check(options[:password], "options")
