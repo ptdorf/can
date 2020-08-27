@@ -214,8 +214,7 @@ module Can
       puts pass
     end
 
-    private
-    def __method_missing name, *args
+    def method_missing name, *args
       name  = name.to_s
       value = args[0]
       if value
@@ -225,8 +224,11 @@ module Can
       end
     end
 
+    private
     def _info()
+      # latest = Can::Util::latest()
       debug "Can version: #{VERSION}"
+      # debug "Latest version: #{latest}"
       debug "Check files #{FILES}"
       debug "Check dirs #{DIRS}"
       debug "Using file #{@file}"

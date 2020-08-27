@@ -86,12 +86,16 @@ module Can
       count = 0
       data = read()
       data.each do |key, value|
+        # puts "Checking key #{key}..."
         if value.class != Hash
           data[key] = {}
           data[key]["value"] = value
           data[key]["created"] = Time.new
           data[key]["tags"] = []
           count += 1
+          puts "Key #{key} migrated to new format"
+        else
+          puts "Key #{key} already exists in new format"
         end
       end
 
