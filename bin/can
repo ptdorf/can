@@ -230,7 +230,7 @@ module Can
     # end
 
     private
-    def _info()
+    def info()
       # latest = Can::Util::latest()
       debug "Can version: #{VERSION}"
       # debug "Latest version: #{latest}"
@@ -269,7 +269,7 @@ module Can
 
       raise "Cound't find a valid can file (#{@file})." if not File.file?(@file)
 
-      _info()
+      info()
 
       return if check(options[:password], "options")
       return if check(ENV.fetch("CAN_PASSWORD", nil), "environment")

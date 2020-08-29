@@ -5,5 +5,5 @@ require "can/crypto"
 require "can/util"
 
 module Can
-  VERSION = "0.10.11"
+  VERSION = "0.10.12"
 end
