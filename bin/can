@@ -114,7 +114,7 @@ module Can
         puts "Passwords don't match."
         abort
       end
-      @can.password pass
+      @can.password pass1
       puts "Can password was changed."
     end
 
