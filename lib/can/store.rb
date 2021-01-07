@@ -36,7 +36,12 @@ module Can
       data = read()
       data[key] ||= {}
       data[key]["value"] = value
-      data[key]["created"] = Time.new
+      if data[key].fetch("created", nil) == nil
+        data[key]["created"] = Time.new
+        data[key]["updated"] = "-"
+      else
+        data[key]["updated"] = Time.new
+      end
       data[key]["tags"] ||= []
       write(data)
     end
@@ -50,6 +55,7 @@ module Can
 
     def tag(key, tag)
       data = read()
+      data[key]["updated"] = Time.new
       data[key]["tags"] = data[key]["tags"] || []
       if not data[key]["tags"].include?(tag)
         data[key]["tags"] << tag
@@ -108,6 +114,10 @@ module Can
 
       write(data)
       count
+    end
+
+    def save(data)
+      return write(data)
     end
 
     private

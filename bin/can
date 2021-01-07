@@ -18,10 +18,62 @@ FILES = [
 ]
 
 module Can
+
+  class Tag < Thor
+    desc "ls", "Lists all tags"
+    def ls(tag=nil)
+      puts "Lists all tags"
+    end
+
+    desc "add KEY TAG", "Adds a tag to a key"
+    def add(key, tag)
+      puts "Add tag"
+    end
+
+    desc "rm KEY TAG", "Removes a tag from a key"
+    def rm(key, tag)
+      puts "Remove tag"
+    end
+
+    desc "mv OLD NEW", "Renames a tag"
+    def mv(old, new)
+      puts "Rename tag"
+    end
+
+    desc "clear TAG", "Clears a tag from all items"
+    def clear(tag)
+      puts "Clears tag"
+    end
+
+    def method_missing name, *args
+      ls
+    end
+
+  end
+
+  class Data < Thor
+    desc "encrypt FILE", "Encrypts data"
+    def encrypt(file=nil)
+      puts "Encrypts a FILE"
+    end
+
+    desc "decrypt FILE", "Decrypts data"
+    def decrypt(file=nil)
+      puts "Decrypts a FILE"
+    end
+  end
+
   class Cli < Thor
-    class_option :password, aliases: "-p"
+    # class_option :password, aliases: "-p"
     class_option :verbose, aliases: "-v", :type => :boolean
     class_option :file, aliases: "-f"
+    class_option :name, aliases: "-n"
+
+    desc "tag SUBCOMMAND", "Manage tags"
+    subcommand "tag", Can::Tag
+
+    desc "data SUBCOMMAND", "Raw data functions"
+    subcommand "data", Can::Data
 
     desc "version", "Show the current version"
     def version
@@ -51,7 +103,7 @@ module Can
     option :short, :type => :boolean, aliases: "-s"
     def ls(tag=nil)
       init
-      rows = [["KEY", "LEN", "CREATED", "TAGS"]]
+      rows = [["KEY", "LENGTH", "CREATED", "UPDATED", "TAGS"]]
       empty = true
 
       @can.all().each do |key, entry|
@@ -65,24 +117,22 @@ module Can
         if entry.class == Hash
           value = entry["value"]
           created = entry["created"]
+          updated = entry["updated"]
           entry["tags"] = entry["tags"] || []
           tags = entry["tags"].join(" ")
         else
           value = entry
-          created = ""
+          created = "-"
+          updated = "-"
           tags = ""
         end
 
-        rows << [key, value.size, created, tags]
-        # if options[:values]
-        #   rows << [key, value, created, tags]
-        # else
-        #   rows << [key, value.size, created, tags]
-        # end
+        rows << [key, value.size, created[0..9], updated[0..9], tags]
       end
 
       if empty
-        puts "The can file #{@file} is empty."
+        # puts "The can file #{@file} is empty."
+        puts "(Empty)"
         return
       end
 
@@ -97,28 +147,26 @@ module Can
       puts "Key #{key} was copied to the clipboard."
     end
 
-    desc "rename KEY NEW_NAME", "Renames a secret"
-    def rename(key, new_name)
+    desc "mv KEY NEW_KEY", "Renames a secret"
+    def mv(old_key, new_key)
       init
-      entry = @can.get(key) or abort "Key #{key} does not exist."
-      @can.rename key, new_name
-      puts "Key #{key} was renamed to #{new_name}."
+      entry = @can.get(old_key) or abort "Key #{old_key} does not exist."
+      @can.rename old_key, new_key
+      puts "Key #{old_key} was renamed to #{new_key}."
     end
 
     desc "password", "Change the can password"
     def password
       init
-      pass1 = ask("New password: ")
-      pass2 = ask("Confirm password: ")
-      if pass1 != pass2
-        puts "Passwords don't match."
-        abort
-      end
+      pass1 = ask_password("New password: ")
+      pass2 = ask_password("Confirm the password: ")
+      raise "Password is required." if pass1.length < 1
+      raise "Passwords don't match." if pass1 != pass2
       @can.password pass1
       puts "Can password was changed."
     end
 
-    desc "set KEY [VALUE]", "Stores a value (empty VALUE show the prompt; use '@random' for a random value)"
+    desc "set KEY [VALUE]", "Stores a value (no VALUE calls the prompt; use '@random' for a random value)"
     def set(key, value=nil)
       init
       clipboard = false
@@ -126,7 +174,7 @@ module Can
         clipboard = true
         value = random(60, true)
       end
-      value = value || ask("Value: ")
+      value = value || ask_password("Enter the value for key '#{key}': ")
       @can.set key, value
       if clipboard
         copy(value)
@@ -144,41 +192,41 @@ module Can
       puts "Key #{key} was deleted."
     end
 
-    desc "tag KEY TAG", "Tags a key"
-    def tag(key, tag)
-      init
-      @can.exists(key) or abort "Key #{key} does not exist."
-      ok = @can.tag(key, tag)
-      puts "Tag #{tag} was added to #{key}." if ok
-      puts "Tag #{tag} already exists on #{key}." unless ok
-    end
+    # desc "tag KEY TAG", "Tags a key"
+    # def tag(key, tag)
+    #   init
+    #   @can.exists(key) or abort "Key #{key} does not exist."
+    #   ok = @can.tag(key, tag)
+    #   puts "Tag #{tag} was added to #{key}." if ok
+    #   puts "Tag #{tag} already exists on #{key}." unless ok
+    # end
 
-    desc "tags [KEY]", "Show all tags (filter for a key)"
-    def tags(key=nil)
-      init
-      if key
-        @can.exists(key) or abort "Key #{key} does not exist."
-        entry = @can.get(key)
-        tags = entry["tags"] || []
-      else
-        tags = []
-        @can.all().each do |key, entry|
-          entry["tags"] = entry["tags"] || []
-          tags = tags | entry["tags"]
-        end
-      end
+    # desc "tags [KEY]", "Show all tags (filter for a key)"
+    # def tags(key=nil)
+    #   init
+    #   if key
+    #     @can.exists(key) or abort "Key #{key} does not exist."
+    #     entry = @can.get(key)
+    #     tags = entry["tags"] || []
+    #   else
+    #     tags = []
+    #     @can.all().each do |key, entry|
+    #       entry["tags"] = entry["tags"] || []
+    #       tags = tags | entry["tags"]
+    #     end
+    #   end
 
-      puts tags.uniq.join("\n")
-    end
+    #   puts tags.uniq.join("\n")
+    # end
 
-    desc "untag KEY TAG", "Untags a tag from a key"
-    def untag(key, tag)
-      init
-      @can.exists(key) or abort "Key #{key} does not exist."
-      ok = @can.untag(key, tag)
-      puts "Tag #{tag} was removed from #{key}." if ok
-      puts "Tag #{tag} doesn't exist on #{key}." unless ok
-    end
+    # desc "untag KEY TAG", "Untags a tag from a key"
+    # def untag(key, tag)
+    #   init
+    #   @can.exists(key) or abort "Key #{key} does not exist."
+    #   ok = @can.untag(key, tag)
+    #   puts "Tag #{tag} was removed from #{key}." if ok
+    #   puts "Tag #{tag} doesn't exist on #{key}." unless ok
+    # end
 
     desc "migrate", "Migrates to new format"
     def migrate()
@@ -187,31 +235,37 @@ module Can
       puts "Keys migrated: #{count}."
     end
 
-    desc "encrypt DATA", "Encrypts data"
-    def encrypt(data)
-      init
-      puts @can.encrypt(data)
-    end
+    # desc "encrypt DATA", "Encrypts data"
+    # def encrypt(data)
+    #   init
+    #   puts @can.encrypt(data)
+    # end
 
-    desc "decrypt DATA", "Decrypts data"
-    def decrypt(data)
-      init
-      puts @can.decrypt(data)
-    end
+    # desc "decrypt DATA", "Decrypts data"
+    # def decrypt(data)
+    #   init
+    #   puts @can.decrypt(data)
+    # end
 
     desc "random [LENGTH]", "Generates a random password"
-    option :symbols, :type => :boolean, aliases: "-s"
+    # option :lowers,  :type => :boolean, aliases: "-l", default: true
+    # option :uppers,  :type => :boolean, aliases: "-u", default: true
+    # option :numbers, :type => :boolean, aliases: "-n", default: true
+    option :symbols, :type => :boolean, aliases: "-s", default: false
     def random(length=60, capture=false)
       info
-      length  = length.to_i
-      chars   = ("0".."9").to_a + ("A".."Z").to_a + ("a".."z").to_a
+      # symbols = %w(! ? # $ @ % & ~ _ - + = : . ; , / \( \) { } < >).to_a
+      symbols = %w(# $ @ % & ~ _ - + = : . ; , / \( \) { } < >).to_a
+      chars  = Array.new
+      chars += ("0".."9").to_a # if options[:numbers]
+      chars += ("A".."Z").to_a # if options[:uppers]
+      chars += ("a".."z").to_a # if options[:lowers]
+      chars += symbols if options[:symbols]
       # chars  += ("!".."?").to_a if options[:symbols]
-      chars  += %w(! ? # $ @ % & ~ _ - + = : . ; , æ ø å\\ / \( \) { } < >).to_a \
-        if options[:symbols]
-      chars.delete(["'", '"'])
+      # chars.delete(["'", '"'])
       # pass = chars.sort_by { rand }.join[0...length]
       pass = []
-      (1 .. length).each do
+      (1 .. length.to_i).each do
         pass << chars[rand(chars.size)]
       end
       pass = pass.join()
@@ -219,61 +273,108 @@ module Can
       puts pass
     end
 
-    # def method_missing name, *args
-    #   name  = name.to_s
-    #   value = args[0]
-    #   if value
-    #     set name, value
-    #   else
-    #     get name
-    #   end
-    # end
+    desc "status", "Show the environment and status"
+    def status()
+      name     = options[:name]    || ENV.fetch("CAN_NAME",     "\033[38;5;242m(none)\033[0m")
+      file     = options[:file]    || ENV.fetch("CAN_FILE",     "\033[38;5;242m(none)\033[0m")
+      verbose  = options[:verbose] || ENV.fetch("CAN_VERBOSE",  "\033[38;5;242m(none)\033[0m")
+      debug    = options[:debug]   || ENV.fetch("CAN_DEBUG",    "\033[38;5;242m(none)\033[0m")
+      password = options[:debug]   || ENV.fetch("CAN_PASSWORD", "\033[38;5;242m(none)\033[0m")
+
+      rows = [["ENVIRONMENT VARIABLE", "VALUE"]]
+      rows << ["  CAN_FILE",      file]
+      rows << ["  CAN_NAME",      name]
+      rows << ["  CAN_VERBOSE",   verbose]
+      rows << ["  CAN_DEBUG",     debug]
+      rows << ["  CAN_PASSWORD",  password]
+      Tablelize::table(rows)
+
+      puts
+      rows = [["LOOKUP OPTIONS", "VALUE"]]
+      rows << ["  Files",       FILES]
+      rows << ["  Directories", DIRS]
+      Tablelize::table(rows)
+    end
+
+    desc "dump", "Dumps the can contents"
+    def dump()
+      init
+      puts JSON.dump(@can.all().each { |k, v| v["value"] = "***" })
+    end
+
+    desc "start [FILE]", "Initializes a new can"
+    def start(file=nil)
+      @file = file || FILES[0]
+      raise "File #{@file} already exists" if File.file?(@file)
+      puts "Going to create file #{@file}"
+
+      password = ask_password()
+      confirm = ask_password("Confirm the password: ")
+
+      raise "Password is required." if password.length < 1
+      raise "Passwords don't match." if password != confirm
+
+      @can = Can::Store.new(@file, password)
+      @can.save({})
+      puts "Can file #{@file} created"
+    end
 
     private
-    def info()
+    def show_info()
       # latest = Can::Util::latest()
-      debug "Can version: #{VERSION}"
       # debug "Latest version: #{latest}"
-      debug "Check files #{FILES}"
-      debug "Check dirs #{DIRS}"
-      debug "Using file #{@file}"
+      debug "Can version: #{VERSION}"
+      debug "Using files #{FILES}"
+      debug "Using dirs #{DIRS}"
       debug "Using options #{options}"
-      debug "Using verbose mode (goes to stderr)"
+      debug "This verbose mode is on (goes to stderr)"
+    end
+
+    def find_default()
+      FILES.each do |file|
+        debug "Trying file #{file}"
+        if File.file?(file)
+          debug "Found file #{file}"
+          return file
+        else
+          debug "File #{file} not found"
+        end
+      end
+      return
+    end
+
+    def find_by_name(name)
+      DIRS.each do |dir|
+        file = "#{dir}/#{name}.can"
+        debug "Trying to find file #{file}"
+        if File.file?(file)
+          debug "File #{file} exists"
+          return file
+        else
+          debug "File #{file} not found"
+        end
+      end
+    end
+
+    def find_file(file=nil, name=nil)
+      return file if file
+      return find_by_name(name) if name
+      return find_default()
     end
 
     def init()
-      @file = options[:file] || ENV.fetch("CAN_FILE", nil)
+      name = options[:name] || ENV.fetch("CAN_NAME", nil)
+      file = options[:file] || ENV.fetch("CAN_FILE", nil)
 
-      if @file == nil or @file.length == 0
-        FILES.each do |file|
-          debug "Checking file #{file}"
-          if File.file?(file)
-            @file = file
-            debug "Using file #{file}"
-            break
-          end
-        end
+      show_info()
+      @file = find_file(name, file)
+      raise "Cound't find a valid file. Try 'can init' to start." \
+        if not @file or not File.file?(@file)
 
-      elsif File.extname(@file) != ".can"
-        DIRS.each do |dir|
-          file = "#{dir}/#{@file}.can"
-          debug "Checking file #{file}"
-          if File.file?(file)
-            @file = file
-            debug "Using file #{file}"
-            break
-          end
-        end
-
-      end
-
-      raise "Cound't find a valid can file (#{@file})." if not File.file?(@file)
-
-      info()
-
-      return if check(options[:password], "options")
-      return if check(ENV.fetch("CAN_PASSWORD", nil), "environment")
-      return if check(ask(), "prompt")
+      # Disable password from args to prevent history recording
+      # return if check(options[:password], "options")
+      return if check(ENV.fetch("CAN_PASSWORD", nil), "env")
+      return if check(ask_password(), "prompt")
       abort
     end
 
@@ -297,7 +398,7 @@ module Can
       value
     end
 
-    def ask(prompt = "Password: ")
+    def ask_password(prompt = "Password: ")
         print prompt
         answer = STDIN.noecho(&:gets).chomp
         raise Interrupt if answer.length < 1
@@ -305,10 +406,10 @@ module Can
         answer
     end
 
-    def debug(message)
-      show = options[:verbose] || ENV.fetch("CAN_DEBUG", "0") == "1"
+    def debug(message, force=false)
+      show = force || options[:verbose] # || ENV.fetch("CAN_DEBUG", "0") == "1"
       return if not show
-      STDERR.puts "\033[38;5;240m#{message}\033[0m"
+      STDERR.puts "\033[38;5;242m#{message}\033[0m"
     end
 
     def copy(value)
@@ -319,12 +420,22 @@ module Can
   end
 end
 
-begin
+ENV["THOR_SILENCE_DEPRECATION"] = "1"
+
+if ARGV.include? "-x" or ENV.fetch("CAN_DEBUG", nil) != nil
+  ARGV.append("-v")
+  STDERR.puts "\033[38;5;242mRunning in debug mode\033[0m"
+  STDERR.puts "\033[38;5;242mARGV: #{ARGV}\033[0m"
   Can::Cli.start ARGV
-rescue Interrupt
-  puts
-  exit 2
-rescue Exception => e
-  puts "Error: #{e}"
-  exit 1
+
+else
+  begin
+    Can::Cli.start ARGV
+  rescue Interrupt
+    puts
+    exit 2
+  rescue Exception => e
+    puts "Error: #{e}"
+    exit 1
+  end
 end
