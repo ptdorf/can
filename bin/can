@@ -166,7 +166,7 @@ module Can
       puts "Can password was changed."
     end
 
-    desc "set KEY [VALUE]", "Stores a value (no VALUE calls the prompt; use '@random' for a random value)"
+    desc "set KEY [VALUE]", "Stores a value (no VALUE calls the prompt; use '@random' for a generated value)"
     def set(key, value=nil)
       init
       clipboard = false
