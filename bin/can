@@ -296,7 +296,7 @@ module Can
       Tablelize::table(rows)
     end
 
-    desc "dump", "Dumps the can contents"
+    desc "dump", "Dumps the can contents (secrets are redacted)"
     def dump()
       init
       puts JSON.dump(@can.all().each { |k, v| v["value"] = "***" })
