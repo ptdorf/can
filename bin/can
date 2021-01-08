@@ -85,24 +85,10 @@ module Can
       end
     end
 
-    # desc "dump", "Show all the contents"
-    # def dump
-    #   init
-    #   p @can.all()
-    # end
-
-    # desc "info", "Show the current state of affairs"
-    # def info
-    #   init
-    #   # options[:verbose] = true
-    #   ENV["CAN_DEBUG"] = "1"
-    #   _info()
-    # end
-
     desc "ls [TAG]", "Lists all keys (filter optionally by TAG)"
     option :short, :type => :boolean, aliases: "-s"
     def ls(tag=nil)
-      init
+      start
       rows = [["KEY", "LENGTH", "CREATED", "UPDATED", "TAGS"]]
       empty = true
 
@@ -141,23 +127,23 @@ module Can
 
     desc "get KEY", "Copies a KEY to the clipboard"
     def get(key)
-      init
+      start
       entry = @can.get(key) or abort "Key #{key} does not exist."
       copy(val(entry))
       puts "Key #{key} was copied to the clipboard."
     end
 
-    desc "mv KEY NEW_KEY", "Renames a secret"
-    def mv(old_key, new_key)
-      init
-      entry = @can.get(old_key) or abort "Key #{old_key} does not exist."
-      @can.rename old_key, new_key
-      puts "Key #{old_key} was renamed to #{new_key}."
+    desc "mv OLD NEW", "Renames a secret"
+    def mv(old, new)
+      start
+      entry = @can.get(old) or abort "Key #{old} does not exist."
+      @can.rename old, new
+      puts "Key #{old} was renamed to #{new}."
     end
 
     desc "password", "Change the can password"
     def password
-      init
+      start
       pass1 = ask_password("New password: ")
       pass2 = ask_password("Confirm the password: ")
       raise "Password is required." if pass1.length < 1
@@ -168,7 +154,7 @@ module Can
 
     desc "set KEY [VALUE]", "Stores a value (no VALUE calls the prompt; use '@random' for a generated value)"
     def set(key, value=nil)
-      init
+      start
       clipboard = false
       if value == "@random"
         clipboard = true
@@ -186,7 +172,7 @@ module Can
 
     desc "rm KEY", "Removes a key"
     def rm(key)
-      init
+      start
       @can.exists(key) or abort "Key #{key} does not exist."
       @can.remove key
       puts "Key #{key} was deleted."
@@ -194,7 +180,7 @@ module Can
 
     # desc "tag KEY TAG", "Tags a key"
     # def tag(key, tag)
-    #   init
+    #   start
     #   @can.exists(key) or abort "Key #{key} does not exist."
     #   ok = @can.tag(key, tag)
     #   puts "Tag #{tag} was added to #{key}." if ok
@@ -203,7 +189,7 @@ module Can
 
     # desc "tags [KEY]", "Show all tags (filter for a key)"
     # def tags(key=nil)
-    #   init
+    #   start
     #   if key
     #     @can.exists(key) or abort "Key #{key} does not exist."
     #     entry = @can.get(key)
@@ -221,7 +207,7 @@ module Can
 
     # desc "untag KEY TAG", "Untags a tag from a key"
     # def untag(key, tag)
-    #   init
+    #   start
     #   @can.exists(key) or abort "Key #{key} does not exist."
     #   ok = @can.untag(key, tag)
     #   puts "Tag #{tag} was removed from #{key}." if ok
@@ -230,20 +216,20 @@ module Can
 
     desc "migrate", "Migrates to new format"
     def migrate()
-      init
+      start
       count = @can.migrate()
       puts "Keys migrated: #{count}."
     end
 
     # desc "encrypt DATA", "Encrypts data"
     # def encrypt(data)
-    #   init
+    #   start
     #   puts @can.encrypt(data)
     # end
 
     # desc "decrypt DATA", "Decrypts data"
     # def decrypt(data)
-    #   init
+    #   start
     #   puts @can.decrypt(data)
     # end
 
@@ -253,7 +239,7 @@ module Can
     # option :numbers, :type => :boolean, aliases: "-n", default: true
     option :symbols, :type => :boolean, aliases: "-s", default: false
     def random(length=60, capture=false)
-      info
+      show_info
       # symbols = %w(! ? # $ @ % & ~ _ - + = : . ; , / \( \) { } < >).to_a
       symbols = %w(# $ @ % & ~ _ - + = : . ; , / \( \) { } < >).to_a
       chars  = Array.new
@@ -298,17 +284,17 @@ module Can
 
     desc "dump", "Dumps the can contents (secrets are redacted)"
     def dump()
-      init
+      start
       puts JSON.dump(@can.all().each { |k, v| v["value"] = "***" })
     end
 
-    desc "start [FILE]", "Initializes a new can"
-    def start(file=nil)
+    desc "init [FILE]", "Initializes a new can"
+    def init(file=nil)
       @file = file || FILES[0]
       raise "File #{@file} already exists" if File.file?(@file)
-      puts "Going to create file #{@file}"
+      puts "Going to create a new can file in #{@file}"
 
-      password = ask_password()
+      password = ask_password("Enter your new can password: ")
       confirm = ask_password("Confirm the password: ")
 
       raise "Password is required." if password.length < 1
@@ -362,13 +348,13 @@ module Can
       return find_default()
     end
 
-    def init()
+    def start()
       name = options[:name] || ENV.fetch("CAN_NAME", nil)
       file = options[:file] || ENV.fetch("CAN_FILE", nil)
 
       show_info()
       @file = find_file(name, file)
-      raise "Cound't find a valid file. Try 'can init' to start." \
+      raise "Cound't find a valid file. Try 'can init' to create a new one." \
         if not @file or not File.file?(@file)
 
       # Disable password from args to prevent history recording
@@ -398,7 +384,7 @@ module Can
       value
     end
 
-    def ask_password(prompt = "Password: ")
+    def ask_password(prompt = "Enter the can password: ")
         print prompt
         answer = STDIN.noecho(&:gets).chomp
         raise Interrupt if answer.length < 1
@@ -419,6 +405,7 @@ module Can
 
   end
 end
+
 
 ENV["THOR_SILENCE_DEPRECATION"] = "1"
 
